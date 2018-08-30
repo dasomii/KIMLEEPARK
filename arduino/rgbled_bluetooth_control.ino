@@ -13,13 +13,13 @@ int H, W, R, G, B;
 int leds[] = {5,6,9,10,11};
 int brightness = 0;
 int i;
-char input = '7';
+char input = 'a';
 
 void fadeIn(int pin, int brightness){
   for(i=0; i<brightness; i++)
   {
     analogWrite(pin, i);
-    delay(10);
+    delay(100);
   }
 }
 
@@ -27,7 +27,7 @@ void fadeOut(int pin, int brightness){
   for(i=brightness; i>=0; i--)
   {
     analogWrite(pin, i);
-    delay(10);
+    delay(100);
   }
 }
 
@@ -44,7 +44,6 @@ void loop() {
     input = BTSerial.read();
     Serial.write(input);
     Serial.write('\n');
-    //delay(100);
   }
   if(Serial.available())
     BTSerial.write(Serial.read());
@@ -146,4 +145,40 @@ void loop() {
     G = 0;
     B = 255;  
   }  
+  
+if(input == '7'){
+    Serial.println("PLAY MODE");
+    digitalWrite(led_H, LOW);
+    digitalWrite(led_W, LOW);
+    
+    while(input == '7'){
+      int dtime = 2500;
+      analogWrite(led_R, 50);
+      delay(dtime);
+      digitalWrite(led_R, LOW);
+      analogWrite(led_G, 50);
+      delay(dtime);
+      digitalWrite(led_G, LOW);
+      analogWrite(led_B, 50);
+      delay(dtime);
+      digitalWrite(led_B, LOW);
+      analogWrite(led_R, 50);
+      analogWrite(led_G, 50);
+      delay(dtime);
+      digitalWrite(led_R, LOW);
+      analogWrite(led_B, 50);
+      delay(dtime);
+      digitalWrite(led_G, LOW);
+      analogWrite(led_R, 50);
+      delay(dtime);
+      digitalWrite(led_R, LOW);
+      digitalWrite(led_B, LOW);
+      if(input != '7') break;
+    }
+    H = 0;
+    W = 0;
+    R = 255;
+    G = 255;
+    B = 255;  
+  }     
 }
