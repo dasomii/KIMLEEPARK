@@ -10,29 +10,34 @@ int led_B = 11; //blue
 
 int H, W, R, G, B;
 
-int leds[] = {5,6,9,10,11};
+int leds[] = {5, 6, 9, 10, 11};
 int brightness = 0;
+int fadeAmount = 5;
 int i;
-char input = 'a';
+bool isLF;
+int previnput, input, cnt = 0;
 
-void fadeIn(int pin, int brightness){
-  for(i=0; i<brightness; i++)
+void fadeIn(int pin, int prev, int next) {
+  for (i = prev; i <= next; i++)
   {
     analogWrite(pin, i);
-    delay(100);
+    delay(20);
   }
 }
 
-void fadeOut(int pin, int brightness){
-  for(i=brightness; i>=0; i--)
+void fadeOut(int pin, int prev, int next) {
+  for (i = prev; i >= next; i--)
   {
     analogWrite(pin, i);
-    delay(100);
+    delay(20);
   }
 }
 
 void setup() {
-  for(i=0; i<sizeof(leds); i++){
+  previnput = -1;
+  input = -38;
+  isLF = false;
+  for (i = 0; i < sizeof(leds); i++) {
     pinMode(leds[i], OUTPUT);
   }
   Serial.begin(9600);
@@ -40,145 +45,143 @@ void setup() {
 }
 
 void loop() {
-  if(BTSerial.available()){
-    input = BTSerial.read();
-    Serial.write(input);
-    Serial.write('\n');
+  Serial.println(input);
+  if (BTSerial.available()) {
+    previnput = (int)BTSerial.read() - 48;
+    cnt++;
+    if (cnt % 3 == 1) {
+      if (input == -38 || input == -35 || input == 5) {
+        input = previnput;
+      }
+      else {
+        previnput = input;
+      }
+
+      Serial.println(input);
+      //delay(100)
+    }
   }
-  if(Serial.available())
+  if (Serial.available())
     BTSerial.write(Serial.read());
 
-  if(input == '0'){
+  if (input == 0) {
     Serial.println("all turn off");
-    for(i=0; i<sizeof(leds); i++){
+    for (i = 0; i < sizeof(leds); i++) {
       analogWrite(leds[i], 0);
     }
     H = 0;
     W = 0;
     R = 0;
     G = 0;
-    B = 0;  
+    B = 0;
+    input = -38;
   }
 
-  if(input == '1'){
-    Serial.println("white 100");
-    fadeIn(led_H, 100);
-    fadeOut(led_W, W);
-    fadeOut(led_R, R);  
-    fadeOut(led_G, G);  
-    fadeOut(led_B, B); 
-    H = 100;
+  else if (input == 1) {
+    Serial.println("white 15");
+    if (H < 15) {
+      fadeIn(led_H, H, 15);
+    }
+    else {
+      fadeOut(led_H, H, 15);
+    }
+    fadeOut(led_W, W, 0);
+    fadeOut(led_R, R, 0);
+    fadeOut(led_G, G, 0);
+    fadeOut(led_B, B, 0);
+    H = 15;
     W = 0;
     R = 0;
     G = 0;
     B = 0;
+    input = -38;
   }
-  
-  if(input == '2'){
+
+  else if (input == 2) {
+    Serial.println("white 55");
+    if (H < 55) {
+      fadeIn(led_H, H, 55);
+    }
+    else {
+      fadeOut(led_H, H, 55);
+    }
+    fadeOut(led_W, W, 0);
+    fadeOut(led_R, R, 0);
+    fadeOut(led_G, G, 0);
+    fadeOut(led_B, B, 0);
+    H = 55;
+    W = 0;
+    R = 0;
+    G = 0;
+    B = 0;
+    input = -38;
+  }
+
+  else if (input == 3) {
     Serial.println("white 255");
-    fadeIn(led_H, 255);
-    fadeOut(led_W, W);
-    fadeOut(led_R, R);  
-    fadeOut(led_G, G);  
-    fadeOut(led_B, B);
+    fadeIn(led_H, H, 255);
+    fadeOut(led_W, W, 0);
+    fadeOut(led_R, R, 0);
+    fadeOut(led_G, G, 0);
+    fadeOut(led_B, B, 0);
     H = 255;
     W = 0;
     R = 0;
     G = 0;
-    B = 0; 
+    B = 0;
+    input = -38;
   }
-  
-  if(input == '3'){
+
+  else if (input == 4) {
     Serial.println("warm white");
-    fadeOut(led_H, H);
-    fadeIn(led_W, 255);
-    fadeOut(led_R, R);  
-    fadeOut(led_G, G);  
-    fadeOut(led_B, B);
+    if (W < 80) {
+      fadeIn(led_W, W, 80);
+    }
+    else {
+      fadeOut(led_W, W, 80);
+    }
+    fadeOut(led_H, H, 0);
+    fadeOut(led_R, R, 0);
+    fadeOut(led_G, G, 0);
+    fadeOut(led_B, B, 0);
     H = 0;
-    W = 255;
+    W = 80;
     R = 0;
     G = 0;
-    B = 0; 
-
-  }
-
-  if(input == '4'){
-    Serial.println("Red");
-    fadeOut(led_H, H);
-    fadeOut(led_W, W);
-    fadeIn(led_R, 255);  
-    fadeOut(led_G, G);  
-    fadeOut(led_B, B);
-    H = 0;
-    W = 0;
-    R = 255;
-    G = 0;
-    B = 0; 
-
-  }
-
-  if(input == '5'){
-    Serial.println("Green");
-    fadeOut(led_H, H);
-    fadeOut(led_W, W);
-    fadeOut(led_R, R);  
-    fadeIn(led_G, 255);  
-    fadeOut(led_B, B);
-    H = 0;
-    W = 0;
-    R = 0;
-    G = 255;
-    B = 0; 
-  }
-
-  if(input == '6'){
-    Serial.println("Blue");
-    fadeOut(led_H, H);
-    fadeOut(led_W, W);
-    fadeOut(led_R, R);  
-    fadeOut(led_G, G);  
-    fadeIn(led_B, 255);
-    H = 0;
-    W = 0;
-    R = 0;
-    G = 0;
-    B = 255;  
-  }  
-  
-if(input == '7'){
-    Serial.println("PLAY MODE");
+    B = 0;
+    input = -38;
+  } else if (input == 5) {
+    Serial.println("for kids");
     digitalWrite(led_H, LOW);
     digitalWrite(led_W, LOW);
-    
-    while(input == '7'){
-      int dtime = 2500;
-      analogWrite(led_R, 50);
-      delay(dtime);
-      digitalWrite(led_R, LOW);
-      analogWrite(led_G, 50);
-      delay(dtime);
-      digitalWrite(led_G, LOW);
-      analogWrite(led_B, 50);
-      delay(dtime);
-      digitalWrite(led_B, LOW);
-      analogWrite(led_R, 50);
-      analogWrite(led_G, 50);
-      delay(dtime);
-      digitalWrite(led_R, LOW);
-      analogWrite(led_B, 50);
-      delay(dtime);
-      digitalWrite(led_G, LOW);
-      analogWrite(led_R, 50);
-      delay(dtime);
-      digitalWrite(led_R, LOW);
-      digitalWrite(led_B, LOW);
-      if(input != '7') break;
-    }
+
+    int dtime = 250;
+    analogWrite(led_R, 250);
+    delay(dtime);
+    digitalWrite(led_R, LOW);
+    analogWrite(led_G, 250);
+    delay(dtime);
+    digitalWrite(led_G, LOW);
+    analogWrite(led_B, 250);
+    delay(dtime);
+    digitalWrite(led_B, LOW);
+    analogWrite(led_R, 250);
+    analogWrite(led_G, 250);
+    delay(dtime);
+    digitalWrite(led_R, LOW);
+    analogWrite(led_B, 250);
+    delay(dtime);
+    digitalWrite(led_G, LOW);
+    analogWrite(led_R, 250);
+    delay(dtime);
+    digitalWrite(led_R, LOW);
+    digitalWrite(led_B, LOW);
+
     H = 0;
     W = 0;
-    R = 255;
-    G = 255;
-    B = 255;  
-  }     
+    R = 0;
+    G = 0;
+    B = 0;
+    //input = 5;
+  }
 }
